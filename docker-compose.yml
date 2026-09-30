@@ -1,0 +1,29 @@
+services:
+  epub2audiobook:
+    build: .
+    image: epub2audiobook:latest
+    volumes:
+      # Monta o código-fonte em tempo real (mudanças no Python refletem na hora, sem precisar de build!)
+      - ./cli.py:/app/cli.py:ro
+      - ./ui_app.py:/app/ui_app.py:ro
+      - ./parsers:/app/parsers:ro
+      - ./core:/app/core:ro
+      - ./utils:/app/utils:ro
+      - ./narrar.py:/app/narrar.py:ro
+      - ./parser.py:/app/parser.py:ro
+      - ./dicionario_pronuncia.json:/app/dicionario_pronuncia.json
+      # Pastas de entrada e saída
+      - ./livros:/app/livros
+      - ./audio:/app/audio
+      # Cache de modelos compartilhado entre usuários do sistema (/var/cache/models)
+      - models_cache:/var/cache/models
+    ports:
+      - "8501:8501"
+    environment:
+      # Suprime avisos do Hugging Face Hub (execução 100% anônima/local)
+      - HF_HUB_DISABLE_IMPLICIT_TOKEN=1
+    command: ["ui"]
+
+volumes:
+  models_cache:
+    name: epub2audiobook_models_cache
